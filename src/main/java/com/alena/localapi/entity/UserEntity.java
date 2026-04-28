@@ -1,4 +1,4 @@
-package entity;
+package com.alena.localapi.entity;
 
 import jakarta.persistence.*;
 

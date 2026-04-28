@@ -1,10 +1,11 @@
-package service;
+package com.alena.localapi.service;
 
-import dto.UserRequestDTO;
-import dto.UserResponseDTO;
-import entity.UserEntity;
+import com.alena.localapi.dto.UserRequestDTO;
+import com.alena.localapi.dto.UserResponseDTO;
+import com.alena.localapi.entity.UserEntity;
+import com.alena.localapi.exception.UserAlreadyExistsException;
+import com.alena.localapi.repository.UserRepository;
 import org.springframework.stereotype.Service;
-import repository.UserRepository;
 
 @Service
 public class UserService {
@@ -16,8 +17,15 @@ public class UserService {
     }
 
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
+
+        if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
+            throw new UserAlreadyExistsException("Пользователь с таким email %s уже существует"
+                    .formatted(userRequestDTO.getEmail()));
+        }
+
         UserEntity userEntity = new UserEntity(userRequestDTO.getEmail(), userRequestDTO.getPassword());
         UserEntity savedUser = userRepository.save(userEntity);
+
         return new UserResponseDTO(savedUser.getId(), savedUser.getEmail());
     }
 }
