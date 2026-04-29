@@ -13,6 +13,13 @@ public class TestClient {
                 .get(endpoint);
     }
 
+    public Response getById(String endpoint, Long id) {
+        return given().spec(ApiConfig.requestSpecification)
+                .pathParam("id", id)
+                .when()
+                .get(endpoint);
+    }
+
     public Response postRequest(String endpoint, UserRequestDTO userRequestDTO) {
         return given().spec(ApiConfig.requestSpecification)
                 .body(userRequestDTO)
