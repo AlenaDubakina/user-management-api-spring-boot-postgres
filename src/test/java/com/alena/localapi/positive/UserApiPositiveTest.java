@@ -69,4 +69,25 @@ public class UserApiPositiveTest extends BaseTest {
         assertUserHasRequiredFields(actualUser);
         assertUserEquals(actualUser, createdUser);
     }
+
+    @Test
+    public void deleteUserTest() {
+        UserRequestDTO userRequestDTO = new UserRequestDTO("test5@mail.com", "123456password");
+
+        UserResponseDTO savedUser = testClient.postRequest(ApiEndpoints.USERS, userRequestDTO)
+                .then()
+                .statusCode(201)
+                .extract()
+                .as(UserResponseDTO.class);
+
+        Long id = savedUser.getId();
+
+        testClient.delete(ApiEndpoints.USERS_BY_ID, id)
+                .then()
+                .statusCode(204);
+
+        testClient.getById(ApiEndpoints.USERS_BY_ID, id)
+                .then()
+                .statusCode(404);
+    }
 }

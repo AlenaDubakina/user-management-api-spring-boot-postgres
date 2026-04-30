@@ -26,4 +26,12 @@ public class TestClient {
                 .when()
                 .post(endpoint);
     }
+
+    public Response delete(String endpoint, Long id) {
+        return given()
+                .spec(ApiConfig.requestSpecification)
+                .pathParam("id", id)
+                .when()
+                .delete(endpoint);
+    }
 }

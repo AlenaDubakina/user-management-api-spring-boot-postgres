@@ -3,6 +3,7 @@ package com.alena.localapi.negative;
 import com.alena.localapi.base.BaseTest;
 import com.alena.localapi.constants.ApiEndpoints;
 import com.alena.localapi.dto.UserRequestDTO;
+import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -34,7 +35,7 @@ public class UserApiNegativeTest extends BaseTest {
                 .then()
                 .statusCode(400)
                 .extract()
-                .as(Map.class);
+                .as(new TypeRef<Map<String, String>>() {});
 
         assertThat(errors)
                 .as("Некорректное поле с ошибкой")
@@ -43,7 +44,7 @@ public class UserApiNegativeTest extends BaseTest {
 
     @Test
     public void createUserAlreadyExistsNegativeTest() {
-        UserRequestDTO userAlreadyExists = new UserRequestDTO("emailalreadyexists@mail.com", "alreadyexists");
+        UserRequestDTO userAlreadyExists = new UserRequestDTO("email_" + System.currentTimeMillis() + "@mail.com", "alreadyexists");
 
         testClient.postRequest(ApiEndpoints.USERS, userAlreadyExists)
                 .then()
@@ -54,5 +55,21 @@ public class UserApiNegativeTest extends BaseTest {
                 .statusCode(409)
                 .body(containsString("Пользователь с таким email %s уже существует"
                         .formatted(userAlreadyExists.getEmail())));
+    }
+
+    @Test
+    public void getUserNoExistsTest() {
+        testClient.getById(ApiEndpoints.USERS_BY_ID, 999L)
+                .then()
+                .statusCode(404)
+                .body(containsString("не существует"));
+    }
+
+    @Test
+    public void deleteUserNoExistsTest() {
+        testClient.delete(ApiEndpoints.USERS_BY_ID, 999L)
+                .then()
+                .statusCode(404)
+                .body(containsString("не существует"));
     }
 }

@@ -47,4 +47,11 @@ public class UserService {
 
         return new UserResponseDTO(savedUser.getId(), savedUser.getEmail());
     }
+
+    public void deleteUser(Long id) {
+        UserEntity user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException("Пользователь с таким id %d не существует"
+                .formatted(id)));
+
+        userRepository.delete(user);
+    }
 }
