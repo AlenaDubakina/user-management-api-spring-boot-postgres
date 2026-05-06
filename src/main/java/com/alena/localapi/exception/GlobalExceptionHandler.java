@@ -37,4 +37,14 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(ex.getMessage());
     }
+
+    @ExceptionHandler(UserEmptyFieldException.class)
+    public ResponseEntity<?> handleUserEmptyField(UserEmptyFieldException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put(ex.getField(), ex.getMessage());
+
+        return ResponseEntity
+                .badRequest()
+                .body(error);
+    }
 }

@@ -3,6 +3,7 @@ package com.alena.localapi.assertions;
 import com.alena.localapi.dto.UserResponseDTO;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,6 +43,18 @@ public class UserAssertions {
         assertThat(userResponseDTO.getEmail())
                 .as("У пользователя должен быть email %s, но был %s".formatted(email, userResponseDTO.getEmail()))
                 .isEqualTo(email);
+    }
+
+    public static void assertFieldError(Map<String, String> errors, String field) {
+        assertThat(errors)
+                .as("Ожидалась ошибка для поля %s, но пришли %s".formatted(field, errors))
+                .containsKey(field);
+    }
+
+    public static void assertErrorsSize(Map<String, String> errors, int expectedSize) {
+        assertThat(errors)
+                .as("Список ошибок содержит некорректное количество элементов")
+                .hasSize(expectedSize);
     }
 
     public static void assertUserHasRequiredFields(UserResponseDTO userResponseDTO) {

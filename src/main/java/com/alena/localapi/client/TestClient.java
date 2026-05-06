@@ -1,13 +1,14 @@
 package com.alena.localapi.client;
 
 import com.alena.localapi.config.ApiConfig;
+import com.alena.localapi.dto.UserPatchDTO;
 import com.alena.localapi.dto.UserRequestDTO;
 import io.restassured.response.Response;
 
 import static io.restassured.RestAssured.given;
 
 public class TestClient {
-    public Response getRequest(String endpoint) {
+    public Response get(String endpoint) {
         return given().spec(ApiConfig.requestSpecification)
                 .when()
                 .get(endpoint);
@@ -20,7 +21,7 @@ public class TestClient {
                 .get(endpoint);
     }
 
-    public Response postRequest(String endpoint, UserRequestDTO userRequestDTO) {
+    public Response post(String endpoint, UserRequestDTO userRequestDTO) {
         return given().spec(ApiConfig.requestSpecification)
                 .body(userRequestDTO)
                 .when()
@@ -33,5 +34,23 @@ public class TestClient {
                 .pathParam("id", id)
                 .when()
                 .delete(endpoint);
+    }
+
+    public Response put(String endpoint, Long id, UserRequestDTO userRequestDTO) {
+        return given()
+                .spec(ApiConfig.requestSpecification)
+                .pathParam("id", id)
+                .body(userRequestDTO)
+                .when()
+                .put(endpoint);
+    }
+
+    public Response patch(String endpoint, Long id, UserPatchDTO patchUpdateUser) {
+        return given()
+                .spec(ApiConfig.requestSpecification)
+                .pathParam("id", id)
+                .body(patchUpdateUser)
+                .when()
+                .patch(endpoint);
     }
 }

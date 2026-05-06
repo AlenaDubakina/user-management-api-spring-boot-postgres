@@ -1,5 +1,6 @@
 package com.alena.localapi.controller;
 
+import com.alena.localapi.dto.UserPatchDTO;
 import com.alena.localapi.dto.UserRequestDTO;
 import com.alena.localapi.dto.UserResponseDTO;
 import com.alena.localapi.service.UserService;
@@ -40,5 +41,15 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}")
+    public UserResponseDTO putUser(@PathVariable Long id, @Valid @RequestBody UserRequestDTO userRequestDTO) {
+        return userService.updateUser(id, userRequestDTO);
+    }
+
+    @PatchMapping("/{id}")
+    public UserResponseDTO patchUser(@PathVariable Long id, @Valid @RequestBody UserPatchDTO patchUpdateUser) {
+        return userService.patchUpdateUser(id, patchUpdateUser);
     }
 }
