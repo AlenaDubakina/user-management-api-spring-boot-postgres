@@ -45,18 +45,6 @@ public class UserAssertions {
                 .isEqualTo(email);
     }
 
-    public static void assertFieldError(Map<String, String> errors, String field) {
-        assertThat(errors)
-                .as("Ожидалась ошибка для поля %s, но пришли %s".formatted(field, errors))
-                .containsKey(field);
-    }
-
-    public static void assertErrorsSize(Map<String, String> errors, int expectedSize) {
-        assertThat(errors)
-                .as("Список ошибок содержит некорректное количество элементов")
-                .hasSize(expectedSize);
-    }
-
     public static void assertUserHasRequiredFields(UserResponseDTO userResponseDTO) {
         assertUserIdIsPositive(userResponseDTO);
         assertEmailFieldIsNotEmpty(userResponseDTO);

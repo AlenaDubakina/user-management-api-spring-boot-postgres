@@ -2,21 +2,20 @@ package com.alena.localapi.negative;
 
 import com.alena.localapi.base.BaseTest;
 import com.alena.localapi.constants.ApiEndpoints;
+import com.alena.localapi.dto.ErrorResponseDTO;
 import com.alena.localapi.dto.UserPatchDTO;
 import com.alena.localapi.dto.UserRequestDTO;
 import com.alena.localapi.dto.UserResponseDTO;
-import io.restassured.common.mapper.TypeRef;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Stream;
 
-import static com.alena.localapi.assertions.UserAssertions.*;
-import static org.hamcrest.Matchers.containsString;
+import static com.alena.localapi.assertions.ErrorAssertions.*;
+import static com.alena.localapi.assertions.UserAssertions.assertUserEquals;
 
 public class UserApiNegativeTest extends BaseTest {
 
@@ -57,17 +56,17 @@ public class UserApiNegativeTest extends BaseTest {
     public void create_invalidUser_negative(String email, String password, List<String> expectedFields) {
         UserRequestDTO invalidUser = new UserRequestDTO(email, password);
 
-        Map<String, String> errors = testClient.post(ApiEndpoints.USERS, invalidUser)
+        ErrorResponseDTO errorResponseDTO = testClient.post(ApiEndpoints.USERS, invalidUser)
                 .then()
                 .statusCode(400)
                 .extract()
-                .as(new TypeRef<Map<String, String>>() {
-                });
+                .as(ErrorResponseDTO.class);
 
-        assertErrorsSize(errors, expectedFields.size());
+        assertValidationErrorResponse(errorResponseDTO, 400, "Validation failed", "Bad Request", ApiEndpoints.USERS);
+        assertErrorsSize(errorResponseDTO.getErrors(), expectedFields.size());
 
         expectedFields.forEach(expectedFieldError ->
-                assertFieldError(errors, expectedFieldError));
+                assertFieldError(errorResponseDTO.getErrors(), expectedFieldError));
     }
 
     @Test
@@ -78,27 +77,38 @@ public class UserApiNegativeTest extends BaseTest {
                 .then()
                 .statusCode(201);
 
-        testClient.post(ApiEndpoints.USERS, userAlreadyExists)
+        ErrorResponseDTO errorResponseDTO = testClient.post(ApiEndpoints.USERS, userAlreadyExists)
                 .then()
                 .statusCode(409)
-                .body(containsString("Пользователь с таким email %s уже существует"
-                        .formatted(userAlreadyExists.getEmail())));
+                .extract()
+                .as(ErrorResponseDTO.class);
+
+        assertValidationErrorResponse(errorResponseDTO, 409, "Пользователь с таким email %s уже существует"
+                .formatted(userAlreadyExists.getEmail()), "Conflict", ApiEndpoints.USERS);
     }
 
     @Test
     public void getUser_noExists_negative() {
-        testClient.getById(ApiEndpoints.USERS_BY_ID, 999L)
+        ErrorResponseDTO errorResponseDTO = testClient.getById(ApiEndpoints.USERS_BY_ID, 999L)
                 .then()
                 .statusCode(404)
-                .body(containsString("не существует"));
+                .extract()
+                .as(ErrorResponseDTO.class);
+
+        assertValidationErrorResponse(errorResponseDTO, 404, "Пользователь с таким id %d не существует"
+                .formatted(999L), "Not Found", ApiEndpoints.USERS);
     }
 
     @Test
     public void deleteUser_noExists_negative() {
-        testClient.delete(ApiEndpoints.USERS_BY_ID, 999L)
+        ErrorResponseDTO errorResponseDTO = testClient.delete(ApiEndpoints.USERS_BY_ID, 999L)
                 .then()
                 .statusCode(404)
-                .body(containsString("не существует"));
+                .extract()
+                .as(ErrorResponseDTO.class);
+
+        assertValidationErrorResponse(errorResponseDTO, 404, "Пользователь с таким id %d не существует"
+                .formatted(999L), "Not Found", ApiEndpoints.USERS);
     }
 
     @ParameterizedTest
@@ -115,27 +125,31 @@ public class UserApiNegativeTest extends BaseTest {
         userRequestDTO.setEmail(email);
         userRequestDTO.setPassword(password);
 
-        Map<String, String> errors = testClient.put(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userRequestDTO)
+        ErrorResponseDTO errorResponseDTO = testClient.put(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userRequestDTO)
                 .then()
                 .statusCode(400)
                 .extract()
-                .as(new TypeRef<Map<String, String>>() {
-                });
+                .as(ErrorResponseDTO.class);
 
-        assertErrorsSize(errors, expectedFields.size());
+        assertValidationErrorResponse(errorResponseDTO, 400, "Validation failed", "Bad Request", ApiEndpoints.USERS);
+        assertErrorsSize(errorResponseDTO.getErrors(), expectedFields.size());
 
         expectedFields.forEach(expectedFieldError ->
-                assertFieldError(errors, expectedFieldError));
+                assertFieldError(errorResponseDTO.getErrors(), expectedFieldError));
     }
 
     @Test
     public void updateUser_noExists_negative() {
         UserRequestDTO userRequestDTO = new UserRequestDTO("user_" + System.currentTimeMillis() + "@mail.com", "123456Password");
 
-        testClient.put(ApiEndpoints.USERS_BY_ID, 999L, userRequestDTO)
+        ErrorResponseDTO errorResponseDTO = testClient.put(ApiEndpoints.USERS_BY_ID, 999L, userRequestDTO)
                 .then()
                 .statusCode(404)
-                .body(containsString("не существует"));
+                .extract()
+                .as(ErrorResponseDTO.class);
+
+        assertValidationErrorResponse(errorResponseDTO, 404, "Пользователь с таким id %d не существует"
+                .formatted(999L), "Not Found", ApiEndpoints.USERS);
     }
 
     @Test
@@ -158,11 +172,14 @@ public class UserApiNegativeTest extends BaseTest {
 
         newUserRequestDTO.setEmail(savedUser.getEmail());
 
-        testClient.put(ApiEndpoints.USERS_BY_ID, savedNewUser.getId(), newUserRequestDTO)
+        ErrorResponseDTO errorResponseDTO = testClient.put(ApiEndpoints.USERS_BY_ID, savedNewUser.getId(), newUserRequestDTO)
                 .then()
                 .statusCode(409)
-                .body(containsString("Пользователь с таким email %s уже существует"
-                        .formatted(newUserRequestDTO.getEmail())));
+                .extract()
+                .as(ErrorResponseDTO.class);
+
+        assertValidationErrorResponse(errorResponseDTO, 409, "Пользователь с таким email %s уже существует"
+                .formatted(newUserRequestDTO.getEmail()), "Conflict", ApiEndpoints.USERS);
 
         UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedNewUser.getId())
                 .then()
@@ -187,17 +204,17 @@ public class UserApiNegativeTest extends BaseTest {
         UserPatchDTO userPatchDTO = new UserPatchDTO();
         userPatchDTO.setEmail(email);
 
-        Map<String, String> errors = testClient.patch(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userPatchDTO)
+        ErrorResponseDTO errorResponseDTO = testClient.patch(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userPatchDTO)
                 .then()
                 .statusCode(400)
                 .extract()
-                .as(new TypeRef<Map<String, String>>() {
-                });
+                .as(ErrorResponseDTO.class);
 
-        assertErrorsSize(errors, 1);
+        assertValidationErrorResponse(errorResponseDTO, 400, "Validation failed", "Bad Request", ApiEndpoints.USERS);
+        assertErrorsSize(errorResponseDTO.getErrors(), expectedFields.size());
 
         expectedFields.forEach(expectedFieldError ->
-                assertFieldError(errors, expectedFieldError));
+                assertFieldError(errorResponseDTO.getErrors(), expectedFieldError));
 
         UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedUser.getId())
                 .then()
@@ -222,17 +239,17 @@ public class UserApiNegativeTest extends BaseTest {
         UserPatchDTO userPatchDTO = new UserPatchDTO();
         userPatchDTO.setPassword(password);
 
-        Map<String, String> errors = testClient.patch(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userPatchDTO)
+        ErrorResponseDTO errorResponseDTO = testClient.patch(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userPatchDTO)
                 .then()
                 .statusCode(400)
                 .extract()
-                .as(new TypeRef<Map<String, String>>() {
-                });
+                .as(ErrorResponseDTO.class);
 
-        assertErrorsSize(errors, 1);
+        assertValidationErrorResponse(errorResponseDTO, 400, "Validation failed", "Bad Request", ApiEndpoints.USERS);
+        assertErrorsSize(errorResponseDTO.getErrors(), expectedFields.size());
 
         expectedFields.forEach(expectedFieldError ->
-                assertFieldError(errors, expectedFieldError));
+                assertFieldError(errorResponseDTO.getErrors(), expectedFieldError));
 
         UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedUser.getId())
                 .then()
@@ -258,17 +275,17 @@ public class UserApiNegativeTest extends BaseTest {
         userPatchDTO.setEmail(email);
         userPatchDTO.setPassword(password);
 
-        Map<String, String> errors = testClient.patch(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userPatchDTO)
+        ErrorResponseDTO errorResponseDTO = testClient.patch(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userPatchDTO)
                 .then()
                 .statusCode(400)
                 .extract()
-                .as(new TypeRef<Map<String, String>>() {
-                });
+                .as(ErrorResponseDTO.class);
 
-        assertErrorsSize(errors, 1);
+        assertValidationErrorResponse(errorResponseDTO, 400, "Validation failed", "Bad Request", ApiEndpoints.USERS);
+        assertErrorsSize(errorResponseDTO.getErrors(), expectedFields.size());
 
         expectedFields.forEach(expectedFieldError ->
-                assertFieldError(errors, expectedFieldError));
+                assertFieldError(errorResponseDTO.getErrors(), expectedFieldError));
 
         UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedUser.getId())
                 .then()
@@ -300,11 +317,14 @@ public class UserApiNegativeTest extends BaseTest {
         UserPatchDTO userPatchDTO = new UserPatchDTO();
         userPatchDTO.setEmail(savedUser.getEmail());
 
-        testClient.patch(ApiEndpoints.USERS_BY_ID, savedNewUser.getId(), userPatchDTO)
+        ErrorResponseDTO errorResponseDTO = testClient.patch(ApiEndpoints.USERS_BY_ID, savedNewUser.getId(), userPatchDTO)
                 .then()
                 .statusCode(409)
-                .body(containsString("Пользователь с таким email %s уже существует"
-                        .formatted(userPatchDTO.getEmail())));
+                .extract()
+                .as(ErrorResponseDTO.class);
+
+        assertValidationErrorResponse(errorResponseDTO, 409, "Пользователь с таким email %s уже существует"
+                .formatted(userPatchDTO.getEmail()), "Conflict", ApiEndpoints.USERS);
 
         UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedNewUser.getId())
                 .then()

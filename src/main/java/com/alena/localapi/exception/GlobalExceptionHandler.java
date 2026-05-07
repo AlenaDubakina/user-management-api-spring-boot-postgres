@@ -1,11 +1,14 @@
 package com.alena.localapi.exception;
 
+import com.alena.localapi.dto.ErrorResponseDTO;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,38 +16,51 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleValidation(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
         Map<String, String> errors = new HashMap<>();
 
         ex.getBindingResult().getFieldErrors().forEach(error -> {
             errors.put(error.getField(), error.getDefaultMessage());
         });
+
         return ResponseEntity
                 .badRequest()
-                .body(errors);
+                .body(buildErrorResponse(HttpStatus.BAD_REQUEST, request, "Validation failed", errors));
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<?> handleUserAlreadyExists(UserAlreadyExistsException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleUserAlreadyExists(UserAlreadyExistsException ex, HttpServletRequest request) {
+
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
-                .body(ex.getMessage());
+                .body(buildErrorResponse(HttpStatus.CONFLICT, request, ex.getMessage(), null));
     }
 
     @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<?> handleUserNotFound(UserNotFoundException ex) {
+    public ResponseEntity<ErrorResponseDTO> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
+
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
-                .body(ex.getMessage());
+                .body(buildErrorResponse(HttpStatus.NOT_FOUND, request, ex.getMessage(), null));
     }
 
     @ExceptionHandler(UserEmptyFieldException.class)
-    public ResponseEntity<?> handleUserEmptyField(UserEmptyFieldException ex) {
-        Map<String, String> error = new HashMap<>();
-        error.put(ex.getField(), ex.getMessage());
+    public ResponseEntity<ErrorResponseDTO> handleUserEmptyField(UserEmptyFieldException ex, HttpServletRequest request) {
+        Map<String, String> errors = new HashMap<>();
+        errors.put(ex.getField(), ex.getMessage());
 
         return ResponseEntity
                 .badRequest()
-                .body(error);
+                .body(buildErrorResponse(HttpStatus.BAD_REQUEST, request, "Validation failed", errors));
+    }
+
+    private ErrorResponseDTO buildErrorResponse(HttpStatus httpStatus, HttpServletRequest request, String message,
+                                                Map<String, String> errors) {
+        return new ErrorResponseDTO(LocalDateTime.now(),
+                httpStatus.value(),
+                httpStatus.getReasonPhrase(),
+                message,
+                request.getRequestURI(),
+                errors);
     }
 }
