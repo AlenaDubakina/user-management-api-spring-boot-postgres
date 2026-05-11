@@ -11,7 +11,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
 
-import static com.alena.localapi.assertions.ErrorAssertions.*;
+import static com.alena.localapi.assertions.ErrorAssertions.assertValidationErrorResponse;
+import static com.alena.localapi.assertions.ErrorAssertions.assertValidationErrors;
 import static com.alena.localapi.assertions.UserAssertions.assertUserEquals;
 import static com.alena.localapi.factory.UserFactory.*;
 
@@ -30,11 +31,12 @@ public class PatchUserNegativeTest extends BaseTest {
                 .extract()
                 .as(ErrorResponseDTO.class);
 
-        assertValidationErrorResponse(errorResponseDTO, 400, "Validation failed", "Bad Request", ApiEndpoints.USERS);
-        assertErrorsSize(errorResponseDTO.getErrors(), expectedFields.size());
-
-        expectedFields.forEach(expectedFieldError ->
-                assertFieldError(errorResponseDTO.getErrors(), expectedFieldError));
+        assertValidationErrors(errorResponseDTO,
+                400,
+                "Validation failed",
+                "Bad Request",
+                ApiEndpoints.USERS,
+                expectedFields);
 
         UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedUser.getId())
                 .then()
@@ -58,11 +60,12 @@ public class PatchUserNegativeTest extends BaseTest {
                 .extract()
                 .as(ErrorResponseDTO.class);
 
-        assertValidationErrorResponse(errorResponseDTO, 400, "Validation failed", "Bad Request", ApiEndpoints.USERS);
-        assertErrorsSize(errorResponseDTO.getErrors(), expectedFields.size());
-
-        expectedFields.forEach(expectedFieldError ->
-                assertFieldError(errorResponseDTO.getErrors(), expectedFieldError));
+        assertValidationErrors(errorResponseDTO,
+                400,
+                "Validation failed",
+                "Bad Request",
+                ApiEndpoints.USERS,
+                expectedFields);
 
         UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedUser.getId())
                 .then()
@@ -86,11 +89,12 @@ public class PatchUserNegativeTest extends BaseTest {
                 .extract()
                 .as(ErrorResponseDTO.class);
 
-        assertValidationErrorResponse(errorResponseDTO, 400, "Validation failed", "Bad Request", ApiEndpoints.USERS);
-        assertErrorsSize(errorResponseDTO.getErrors(), expectedFields.size());
-
-        expectedFields.forEach(expectedFieldError ->
-                assertFieldError(errorResponseDTO.getErrors(), expectedFieldError));
+        assertValidationErrors(errorResponseDTO,
+                400,
+                "Validation failed",
+                "Bad Request",
+                ApiEndpoints.USERS,
+                expectedFields);
 
         UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedUser.getId())
                 .then()

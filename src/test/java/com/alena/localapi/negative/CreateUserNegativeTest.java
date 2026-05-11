@@ -10,7 +10,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
 
-import static com.alena.localapi.assertions.ErrorAssertions.*;
+import static com.alena.localapi.assertions.ErrorAssertions.assertValidationErrorResponse;
+import static com.alena.localapi.assertions.ErrorAssertions.assertValidationErrors;
 import static com.alena.localapi.factory.UserFactory.customUser;
 import static com.alena.localapi.factory.UserFactory.defaultUser;
 
@@ -26,11 +27,12 @@ public class CreateUserNegativeTest extends BaseTest {
                 .extract()
                 .as(ErrorResponseDTO.class);
 
-        assertValidationErrorResponse(errorResponseDTO, 400, "Validation failed", "Bad Request", ApiEndpoints.USERS);
-        assertErrorsSize(errorResponseDTO.getErrors(), expectedFields.size());
-
-        expectedFields.forEach(expectedFieldError ->
-                assertFieldError(errorResponseDTO.getErrors(), expectedFieldError));
+        assertValidationErrors(errorResponseDTO,
+                400,
+                "Validation failed",
+                "Bad Request",
+                ApiEndpoints.USERS,
+                expectedFields);
     }
 
     @Test

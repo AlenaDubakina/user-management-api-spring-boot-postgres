@@ -3,11 +3,24 @@ package com.alena.localapi.assertions;
 import com.alena.localapi.dto.ErrorResponseDTO;
 import org.assertj.core.api.SoftAssertions;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ErrorAssertions {
+
+    public static void assertFieldError(Map<String, String> errors, String field) {
+        assertThat(errors)
+                .as("Ожидалась ошибка для поля %s, но пришли %s".formatted(field, errors))
+                .containsKey(field);
+    }
+
+    public static void assertErrorsSize(Map<String, String> errors, int expectedSize) {
+        assertThat(errors)
+                .as("Список ошибок содержит некорректное количество элементов")
+                .hasSize(expectedSize);
+    }
 
     public static void assertValidationErrorResponse(
             ErrorResponseDTO errorResponseDTO,
@@ -41,15 +54,15 @@ public class ErrorAssertions {
         softly.assertAll();
     }
 
-    public static void assertFieldError(Map<String, String> errors, String field) {
-        assertThat(errors)
-                .as("Ожидалась ошибка для поля %s, но пришли %s".formatted(field, errors))
-                .containsKey(field);
-    }
+    public static void assertValidationErrors(ErrorResponseDTO errorResponseDTO,
+                                              Integer expectedStatus,
+                                              String expectedMessage,
+                                              String expectedError,
+                                              String expectedPath, List<String> expectedFields) {
+        assertValidationErrorResponse(errorResponseDTO, expectedStatus, expectedMessage, expectedError, expectedPath);
+        assertErrorsSize(errorResponseDTO.getErrors(), expectedFields.size());
 
-    public static void assertErrorsSize(Map<String, String> errors, int expectedSize) {
-        assertThat(errors)
-                .as("Список ошибок содержит некорректное количество элементов")
-                .hasSize(expectedSize);
+        expectedFields.forEach(field ->
+                assertFieldError(errorResponseDTO.getErrors(), field));
     }
 }
