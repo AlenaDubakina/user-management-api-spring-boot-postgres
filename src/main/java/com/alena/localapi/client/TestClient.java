@@ -21,9 +21,9 @@ public class TestClient {
                 .get(endpoint);
     }
 
-    public Response post(String endpoint, UserRequestDTO userRequestDTO) {
+    public Response post(String endpoint, Object body) {
         return given().spec(ApiConfig.requestSpecification)
-                .body(userRequestDTO)
+                .body(body)
                 .when()
                 .post(endpoint);
     }

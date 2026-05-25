@@ -1,48 +1,53 @@
 package com.alena.localapi.base;
 
+import com.alena.localapi.auth.dto.AuthResponseDTO;
+import com.alena.localapi.auth.dto.RegisterRequestDTO;
 import com.alena.localapi.client.TestClient;
 import com.alena.localapi.constants.ApiEndpoints;
 import com.alena.localapi.dto.UserRequestDTO;
 import com.alena.localapi.dto.UserResponseDTO;
+import com.alena.localapi.repository.UserRepository;
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
 
-import java.util.ArrayList;
-import java.util.List;
-
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class BaseTest {
-    protected static TestClient testClient;
-    protected List<Long> createdUsersId = new ArrayList<>();
+    protected TestClient testClient;
+    @Autowired
+    protected UserRepository userRepository;
 
-    @BeforeAll
-    public static void setup() {
+    @LocalServerPort
+    private int port;
+
+    @BeforeEach
+    public void setup() {
+        RestAssured.port = port;
         testClient = new TestClient();
         RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
     @AfterEach
     public void cleanup() {
-        createdUsersId.forEach(userId -> {
-            try {
-                testClient.delete(ApiEndpoints.USERS_BY_ID, userId);
-            } catch (Exception ignored) {
-            }
-        });
-        createdUsersId.clear();
+        userRepository.deleteAll();
     }
 
     protected UserResponseDTO createUser(UserRequestDTO dto) {
-        UserResponseDTO userResponseDTO = testClient.post(ApiEndpoints.USERS, dto)
+        return testClient.post(ApiEndpoints.USERS, dto)
                 .then()
                 .statusCode(201)
                 .extract()
                 .as(UserResponseDTO.class);
+    }
 
-        if (userResponseDTO.getId() != null) {
-            createdUsersId.add(userResponseDTO.getId());
-        }
-
-        return userResponseDTO;
+    protected AuthResponseDTO registerUser(RegisterRequestDTO dto) {
+        return testClient.post(ApiEndpoints.AUTH_REGISTER, dto)
+                .then()
+                .statusCode(201)
+                .extract()
+                .as(AuthResponseDTO.class);
     }
 }

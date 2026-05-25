@@ -3,7 +3,7 @@ package com.alena.localapi.factory;
 import com.alena.localapi.dto.UserPatchDTO;
 import com.alena.localapi.dto.UserRequestDTO;
 
-import java.util.UUID;
+import static com.alena.localapi.utils.TestUtils.generateRandomEmail;
 
 public final class UserFactory {
 
@@ -35,9 +35,5 @@ public final class UserFactory {
         dto.setEmail(email);
         dto.setPassword(password);
         return dto;
-    }
-
-    private static String generateRandomEmail() {
-        return "email_" + UUID.randomUUID().toString().substring(0, 8) + "@mail.com";
     }
 }
