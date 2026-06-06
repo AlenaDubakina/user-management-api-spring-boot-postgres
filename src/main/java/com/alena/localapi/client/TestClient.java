@@ -14,6 +14,13 @@ public class TestClient {
                 .get(endpoint);
     }
 
+    public Response get(String endpoint, String token) {
+        return given().spec(ApiConfig.requestSpecification)
+                .header("Authorization", "Bearer " + token)
+                .when()
+                .get(endpoint);
+    }
+
     public Response getById(String endpoint, Long id) {
         return given().spec(ApiConfig.requestSpecification)
                 .pathParam("id", id)

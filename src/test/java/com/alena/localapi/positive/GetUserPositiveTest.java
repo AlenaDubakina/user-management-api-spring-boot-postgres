@@ -1,5 +1,7 @@
 package com.alena.localapi.positive;
 
+import com.alena.localapi.auth.dto.AuthResponseDTO;
+import com.alena.localapi.auth.dto.RegisterRequestDTO;
 import com.alena.localapi.base.BaseTest;
 import com.alena.localapi.constants.ApiEndpoints;
 import com.alena.localapi.dto.UserResponseDTO;
@@ -8,12 +10,16 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static com.alena.localapi.assertions.UserAssertions.*;
+import static com.alena.localapi.factory.AuthFactory.validRegisterRequest;
 import static com.alena.localapi.factory.UserFactory.defaultUser;
 
 public class GetUserPositiveTest extends BaseTest {
     @Test
     public void getAllUsers() {
-        List<UserResponseDTO> users = testClient.get(ApiEndpoints.USERS)
+        RegisterRequestDTO registerRequestDTO = validRegisterRequest();
+        AuthResponseDTO authResponseDTO = registerUser(registerRequestDTO);
+
+        List<UserResponseDTO> users = testClient.get(ApiEndpoints.USERS, authResponseDTO.getToken())
                 .then()
                 .statusCode(200)
                 .extract()
