@@ -10,7 +10,7 @@ import static com.alena.localapi.assertions.ErrorAssertions.assertValidationErro
 public class DeleteUserNegativeTest extends BaseTest {
     @Test
     public void deleteUser_noExists_negative() {
-        ErrorResponseDTO errorResponseDTO = testClient.delete(ApiEndpoints.USERS_BY_ID, 999L)
+        ErrorResponseDTO errorResponseDTO = testClient.delete(ApiEndpoints.USERS_BY_ID, 999L, getAuthToken())
                 .then()
                 .statusCode(404)
                 .extract()

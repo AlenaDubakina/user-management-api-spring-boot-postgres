@@ -20,12 +20,13 @@ public class PatchUserNegativeTest extends BaseTest {
     @ParameterizedTest
     @MethodSource("com.alena.localapi.providers.user.PatchUserDataProvider#invalidEmailForPatch")
     public void patchUser_email_negative(String email, List<String> expectedFields) {
+        String token = getAuthToken();
 
-        UserResponseDTO savedUser = createUser(defaultUser());
+        UserResponseDTO savedUser = createUser(defaultUser(), token);
 
         UserPatchDTO userPatchDTO = patchWithEmail(email);
 
-        ErrorResponseDTO errorResponseDTO = testClient.patch(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userPatchDTO)
+        ErrorResponseDTO errorResponseDTO = testClient.patch(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userPatchDTO, token)
                 .then()
                 .statusCode(400)
                 .extract()
@@ -38,7 +39,7 @@ public class PatchUserNegativeTest extends BaseTest {
                 ApiEndpoints.USERS,
                 expectedFields);
 
-        UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedUser.getId())
+        UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedUser.getId(), token)
                 .then()
                 .statusCode(200)
                 .extract()
@@ -50,11 +51,13 @@ public class PatchUserNegativeTest extends BaseTest {
     @ParameterizedTest
     @MethodSource("com.alena.localapi.providers.user.PatchUserDataProvider#invalidPasswordForPatch")
     public void patchUser_password_negative(String password, List<String> expectedFields) {
-        UserResponseDTO savedUser = createUser(defaultUser());
+        String token = getAuthToken();
+
+        UserResponseDTO savedUser = createUser(defaultUser(), token);
 
         UserPatchDTO userPatchDTO = patchWithPassword(password);
 
-        ErrorResponseDTO errorResponseDTO = testClient.patch(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userPatchDTO)
+        ErrorResponseDTO errorResponseDTO = testClient.patch(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userPatchDTO, token)
                 .then()
                 .statusCode(400)
                 .extract()
@@ -67,7 +70,7 @@ public class PatchUserNegativeTest extends BaseTest {
                 ApiEndpoints.USERS,
                 expectedFields);
 
-        UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedUser.getId())
+        UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedUser.getId(), token)
                 .then()
                 .statusCode(200)
                 .extract()
@@ -79,11 +82,13 @@ public class PatchUserNegativeTest extends BaseTest {
     @ParameterizedTest
     @MethodSource("com.alena.localapi.providers.user.PatchUserDataProvider#invalidMultipleFieldsFailFast")
     public void patchUser_emailPassword_negative(String email, String password, List<String> expectedFields) {
-        UserResponseDTO savedUser = createUser(defaultUser());
+        String token = getAuthToken();
+
+        UserResponseDTO savedUser = createUser(defaultUser(), token);
 
         UserPatchDTO userPatchDTO = patchWithEmailAndPassword(email, password);
 
-        ErrorResponseDTO errorResponseDTO = testClient.patch(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userPatchDTO)
+        ErrorResponseDTO errorResponseDTO = testClient.patch(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userPatchDTO, token)
                 .then()
                 .statusCode(400)
                 .extract()
@@ -96,7 +101,7 @@ public class PatchUserNegativeTest extends BaseTest {
                 ApiEndpoints.USERS,
                 expectedFields);
 
-        UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedUser.getId())
+        UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedUser.getId(), token)
                 .then()
                 .statusCode(200)
                 .extract()
@@ -107,13 +112,15 @@ public class PatchUserNegativeTest extends BaseTest {
 
     @Test
     public void patchUser_alreadyExistsEmail_negative() {
-        UserResponseDTO savedUser = createUser(defaultUser());
+        String token = getAuthToken();
 
-        UserResponseDTO savedNewUser = createUser(defaultUser());
+        UserResponseDTO savedUser = createUser(defaultUser(), token);
+
+        UserResponseDTO savedNewUser = createUser(defaultUser(), token);
 
         UserPatchDTO userPatchDTO = patchWithEmail(savedUser.getEmail());
 
-        ErrorResponseDTO errorResponseDTO = testClient.patch(ApiEndpoints.USERS_BY_ID, savedNewUser.getId(), userPatchDTO)
+        ErrorResponseDTO errorResponseDTO = testClient.patch(ApiEndpoints.USERS_BY_ID, savedNewUser.getId(), userPatchDTO, token)
                 .then()
                 .statusCode(409)
                 .extract()
@@ -122,7 +129,7 @@ public class PatchUserNegativeTest extends BaseTest {
         assertValidationErrorResponse(errorResponseDTO, 409, "Пользователь с таким email %s уже существует"
                 .formatted(userPatchDTO.getEmail()), "Conflict", ApiEndpoints.USERS);
 
-        UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedNewUser.getId())
+        UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedNewUser.getId(), token)
                 .then()
                 .statusCode(200)
                 .extract()

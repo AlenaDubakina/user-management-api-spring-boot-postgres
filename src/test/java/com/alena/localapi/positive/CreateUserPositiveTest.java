@@ -16,7 +16,7 @@ public class CreateUserPositiveTest extends BaseTest {
     public void createUser(String email, String password) {
         UserRequestDTO userRequestDTO = customUser(email, password);
 
-        UserResponseDTO user = createUser(userRequestDTO);
+        UserResponseDTO user = createUser(userRequestDTO, getAuthToken());
 
         assertUserHasRequiredFields(user);
         assertUserEmailIsEquals(user, userRequestDTO.getEmail());

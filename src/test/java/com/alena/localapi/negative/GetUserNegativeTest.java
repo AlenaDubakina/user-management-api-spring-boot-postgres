@@ -9,8 +9,22 @@ import static com.alena.localapi.assertions.ErrorAssertions.assertValidationErro
 
 public class GetUserNegativeTest extends BaseTest {
     @Test
+    public void getUser_without_token_negative() {
+        testClient.get(ApiEndpoints.USERS)
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    public void getUser_invalid_token_negative() {
+        testClient.get(ApiEndpoints.USERS, "invalid.jwt.token")
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
     public void getUser_noExists_negative() {
-        ErrorResponseDTO errorResponseDTO = testClient.getById(ApiEndpoints.USERS_BY_ID, 999L)
+        ErrorResponseDTO errorResponseDTO = testClient.getById(ApiEndpoints.USERS_BY_ID, 999L, getAuthToken())
                 .then()
                 .statusCode(404)
                 .extract()
