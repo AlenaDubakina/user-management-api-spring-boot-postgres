@@ -2,6 +2,7 @@ package com.alena.localapi.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,6 +25,16 @@ public class SecurityConfig {
         return http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**")
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/users/**")
+                        .hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.POST, "/users/**")
+                        .hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PUT, "/users/**")
+                        .hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PATCH, "/users/**")
+                        .hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.DELETE, "/users/**")
+                        .hasRole("ADMIN")
                         .anyRequest()
                         .authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
