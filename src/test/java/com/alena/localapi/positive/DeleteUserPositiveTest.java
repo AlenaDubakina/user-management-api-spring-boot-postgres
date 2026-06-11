@@ -10,17 +10,17 @@ import static com.alena.localapi.factory.UserFactory.defaultUser;
 public class DeleteUserPositiveTest extends BaseTest {
     @Test
     public void deleteUser() {
-        String token = getAuthToken();
+        String adminToken = getAdminToken();
 
-        UserResponseDTO savedUser = createUser(defaultUser(), token);
+        UserResponseDTO savedUser = createUser(defaultUser(), adminToken);
 
         Long id = savedUser.getId();
 
-        testClient.delete(ApiEndpoints.USERS_BY_ID, id, token)
+        testClient.delete(ApiEndpoints.USERS_BY_ID, id, adminToken)
                 .then()
                 .statusCode(204);
 
-        testClient.getById(ApiEndpoints.USERS_BY_ID, id, token)
+        testClient.getById(ApiEndpoints.USERS_BY_ID, id, adminToken)
                 .then()
                 .statusCode(404);
     }
