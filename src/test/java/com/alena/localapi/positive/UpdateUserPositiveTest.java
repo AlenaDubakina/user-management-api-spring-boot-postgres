@@ -12,15 +12,15 @@ import static com.alena.localapi.factory.UserFactory.defaultUser;
 public class UpdateUserPositiveTest extends BaseTest {
     @Test
     public void updateUser() {
-        String token = getAuthToken();
+        String userToken = getUserToken();
 
         UserRequestDTO userRequestDTO = defaultUser();
 
-        UserResponseDTO user = createUser(userRequestDTO, token);
+        UserResponseDTO user = createUser(userRequestDTO, userToken);
 
         userRequestDTO.setEmail("updateTest@google.com");
 
-        UserResponseDTO updatedUser = testClient.put(ApiEndpoints.USERS_BY_ID, user.getId(), userRequestDTO, token)
+        UserResponseDTO updatedUser = testClient.put(ApiEndpoints.USERS_BY_ID, user.getId(), userRequestDTO, userToken)
                 .then()
                 .log().all()
                 .statusCode(200)

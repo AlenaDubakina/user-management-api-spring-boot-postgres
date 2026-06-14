@@ -21,7 +21,7 @@ public class CreateUserNegativeTest extends BaseTest {
     public void createUser_shouldReturn400_whenDataInvalid(String email, String password, List<String> expectedFields) {
         UserRequestDTO invalidUser = customUser(email, password);
 
-        ErrorResponseDTO errorResponseDTO = testClient.post(ApiEndpoints.USERS, invalidUser, getAuthToken())
+        ErrorResponseDTO errorResponseDTO = testClient.post(ApiEndpoints.USERS, invalidUser, getUserToken())
                 .then()
                 .statusCode(400)
                 .extract()
@@ -37,13 +37,13 @@ public class CreateUserNegativeTest extends BaseTest {
 
     @Test
     public void createUser_alreadyExists_negative() {
-        String token = getAuthToken();
+        String userToken = getUserToken();
 
         UserRequestDTO userAlreadyExists = defaultUser();
 
-        createUser(userAlreadyExists, token);
+        createUser(userAlreadyExists, userToken);
 
-        ErrorResponseDTO errorResponseDTO = testClient.post(ApiEndpoints.USERS, userAlreadyExists, token)
+        ErrorResponseDTO errorResponseDTO = testClient.post(ApiEndpoints.USERS, userAlreadyExists, userToken)
                 .then()
                 .statusCode(409)
                 .extract()

@@ -21,13 +21,13 @@ public class UpdateUserNegativeTest extends BaseTest {
     @ParameterizedTest
     @MethodSource("com.alena.localapi.providers.user.UserDataProvider#invalidUserData")
     public void updateUser_negative(String email, String password, List<String> expectedFields) {
-        String token = getAuthToken();
+        String userToken = getUserToken();
 
-        UserResponseDTO savedUser = createUser(defaultUser(), token);
+        UserResponseDTO savedUser = createUser(defaultUser(), userToken);
 
         UserRequestDTO userRequestDTO = customUser(email, password);
 
-        ErrorResponseDTO errorResponseDTO = testClient.put(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userRequestDTO, token)
+        ErrorResponseDTO errorResponseDTO = testClient.put(ApiEndpoints.USERS_BY_ID, savedUser.getId(), userRequestDTO, userToken)
                 .then()
                 .statusCode(400)
                 .extract()
@@ -43,7 +43,7 @@ public class UpdateUserNegativeTest extends BaseTest {
 
     @Test
     public void updateUser_noExists_negative() {
-        ErrorResponseDTO errorResponseDTO = testClient.put(ApiEndpoints.USERS_BY_ID, 999L, defaultUser(), getAuthToken())
+        ErrorResponseDTO errorResponseDTO = testClient.put(ApiEndpoints.USERS_BY_ID, 999L, defaultUser(), getUserToken())
                 .then()
                 .statusCode(404)
                 .extract()
@@ -55,17 +55,17 @@ public class UpdateUserNegativeTest extends BaseTest {
 
     @Test
     public void updateUser_alreadyExistsEmail_negative() {
-        String token = getAuthToken();
+        String userToken = getUserToken();
 
-        UserResponseDTO savedUser = createUser(defaultUser(), token);
+        UserResponseDTO savedUser = createUser(defaultUser(), userToken);
 
         UserRequestDTO newUserRequestDTO = defaultUser();
 
-        UserResponseDTO savedNewUser = createUser(newUserRequestDTO, token);
+        UserResponseDTO savedNewUser = createUser(newUserRequestDTO, userToken);
 
         newUserRequestDTO.setEmail(savedUser.getEmail());
 
-        ErrorResponseDTO errorResponseDTO = testClient.put(ApiEndpoints.USERS_BY_ID, savedNewUser.getId(), newUserRequestDTO, token)
+        ErrorResponseDTO errorResponseDTO = testClient.put(ApiEndpoints.USERS_BY_ID, savedNewUser.getId(), newUserRequestDTO, userToken)
                 .then()
                 .statusCode(409)
                 .extract()
@@ -74,7 +74,7 @@ public class UpdateUserNegativeTest extends BaseTest {
         assertValidationErrorResponse(errorResponseDTO, 409, "Пользователь с таким email %s уже существует"
                 .formatted(newUserRequestDTO.getEmail()), "Conflict", ApiEndpoints.USERS);
 
-        UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedNewUser.getId(), token)
+        UserResponseDTO updateUser = testClient.getById(ApiEndpoints.USERS_BY_ID, savedNewUser.getId(), userToken)
                 .then()
                 .statusCode(200)
                 .extract()

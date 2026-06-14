@@ -13,7 +13,7 @@ import static com.alena.localapi.factory.UserFactory.defaultUser;
 public class GetUserPositiveTest extends BaseTest {
     @Test
     public void getAllUsers() {
-        List<UserResponseDTO> users = testClient.get(ApiEndpoints.USERS, getAuthToken())
+        List<UserResponseDTO> users = testClient.get(ApiEndpoints.USERS, getUserToken())
                 .then()
                 .statusCode(200)
                 .extract()
@@ -26,11 +26,11 @@ public class GetUserPositiveTest extends BaseTest {
 
     @Test
     public void getUserById() {
-        String token = getAuthToken();
+        String userToken = getUserToken();
 
-        UserResponseDTO createdUser = createUser(defaultUser(), token);
+        UserResponseDTO createdUser = createUser(defaultUser(), userToken);
 
-        UserResponseDTO actualUser = testClient.getById(ApiEndpoints.USERS_BY_ID, createdUser.getId(), token)
+        UserResponseDTO actualUser = testClient.getById(ApiEndpoints.USERS_BY_ID, createdUser.getId(), userToken)
                 .then()
                 .statusCode(200)
                 .extract()
